@@ -1,0 +1,483 @@
+/* ============================================================
+   蛋蛋桌宠 · 渲染层样式 (pet.css)
+   阶段 0：透明窗口 + 一个占位"蛋"造型（阶段 1 换成像素 sprite）
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: transparent;   /* 关键：窗口透明 */
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* 蛋蛋本体：贴在窗口底部居中 */
+#pet {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 130px;
+  cursor: grab;
+  /* 不用系统原生拖动（-webkit-app-region:drag）：透明置顶窗口用它拖动时，
+     Chromium 有概率在拖动结束后不重绘合成层，导致窗口"消失"。改为主进程手动跟随光标拖动。 */
+}
+#pet:active { cursor: grabbing; }
+
+/* 占位蛋造型（白嫩蛋壳 + 简单表情）*/
+.egg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #fffdf9 0%, #f8f0e4 100%);
+  border: 4px solid #e0c9a0;
+  /* 蛋形：上窄下宽 */
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  box-shadow:
+    inset 6px 6px 0 rgba(255, 255, 255, 0.7),
+    inset -6px -8px 0 rgba(0, 0, 0, 0.05),
+    4px 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* 眼睛（楚楚可怜大眼睛）*/
+.eye {
+  position: absolute;
+  top: 48%;
+  width: 20px;
+  height: 24px;
+  background: radial-gradient(circle at 50% 60%, #1a1410 0%, #1a1410 55%, #3b2f1c 55%, #3b2f1c 100%);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 6px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.15);
+}
+/* 大高光（右上）*/
+.eye::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.6);
+  z-index: 1;
+}
+/* 小高光（左下）*/
+.eye::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 4px;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+  z-index: 1;
+}
+.eye--l { left: 18%; }
+.eye--r { right: 18%; }
+
+/* 腮红 */
+.blush {
+  position: absolute;
+  top: 60%;
+  width: 16px;
+  height: 10px;
+  background: rgba(255, 150, 150, 0.45);
+  border-radius: 50%;
+}
+.blush--l { left: 16%; }
+.blush--r { right: 16%; }
+
+/* 粉色蝴蝶结（格子纹路）*/
+.bow {
+  position: absolute;
+  top: 4%;
+  right: 10%;
+  width: 40px;
+  height: 26px;
+  z-index: 1;
+}
+.bow::before,
+.bow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 20px;
+  height: 26px;
+  background:
+    linear-gradient(45deg, rgba(255,255,255,0.3) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.3) 75%) 0 0/8px 8px,
+    linear-gradient(45deg, rgba(255,255,255,0.3) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.3) 75%) 4px 4px/8px 8px,
+    #f7a0b8;
+  border-radius: 50% 50% 50% 0;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.5);
+}
+.bow::before { left: 0; transform: rotate(-15deg); }
+.bow::after  { right: 0; transform: rotate(15deg) scaleX(-1); }
+/* 蝴蝶结中间的结 */
+.egg .bow-knot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #e87a9e;
+  border-radius: 50%;
+}
+
+/* 嘴 */
+.mouth {
+  position: absolute;
+  top: 68%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 10px;
+  border-bottom: 4px solid #3b2f1c;
+  border-radius: 0 0 12px 12px;
+}
+
+/* ============================================================
+   动画：全部作用在蛋壳/五官(内层)，绝不碰 #pet 这个拖动锚点，
+   这样原生拖动的命中区域始终稳定。
+   状态用 #pet 上的 class 切换：idle(默认) / walking / talking / sleeping
+   ============================================================ */
+
+/* 待机：轻微上下呼吸 */
+@keyframes breathe {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.egg { animation: breathe 3.2s ease-in-out infinite; }
+
+/* 走路：左右摇摆 waddle（走动时覆盖呼吸）*/
+@keyframes waddle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%      { transform: translateY(-2px) rotate(-6deg); }
+  75%      { transform: translateY(-2px) rotate(6deg); }
+}
+#pet.walking .egg { animation: waddle 0.4s ease-in-out infinite; }
+
+/* 眨眼：把眼睛压扁一下 */
+.eye { transform-origin: center; transition: transform 0.06s ease; }
+#pet.blinking .eye { transform: scaleY(0.1); }
+
+/* 说话：嘴巴一开一合（阶段 2 说话时用）*/
+@keyframes talk {
+  0%, 100% { height: 8px; }
+  50%      { height: 15px; }
+}
+#pet.talking .mouth { animation: talk 0.28s ease-in-out infinite; }
+
+/* 睡觉：完全闭眼(弯弯的闭眼线) + 更慢的呼吸 */
+#pet.sleeping .eye {
+  background: none;
+  box-shadow: none;
+  height: 8px;
+  border: none;
+  border-bottom: 3px solid #3b2f1c;
+  border-radius: 0 0 20px 20px;
+}
+#pet.sleeping .eye::before,
+#pet.sleeping .eye::after { display: none; }
+#pet.sleeping .egg { animation: breathe 5.5s ease-in-out infinite; }
+
+/* ============================================================
+   情绪系统：给 #pet 加 mood-xxx class，改眼睛/嘴巴 + 头顶图标
+   情绪：angry生气 happy高兴 pitiful可怜 tired累 sad伤心 excited兴奋 cute卖萌
+   ============================================================ */
+
+/* 情绪图标：蛋蛋左上角（贴着脑袋，不超出）*/
+.mood-icon {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+#pet[class*="mood-"] .mood-icon { opacity: 1; }
+/* 伤心不用头顶图标（改成真的流泪）*/
+#pet.mood-sad .mood-icon { opacity: 0 !important; }
+
+/* ---- 生气：眉眼下压、嘴巴倒扣、头顶怒气符号 + 微微发红 ---- */
+#pet.mood-angry .eye { transform: scaleY(0.75) rotate(0deg); }
+#pet.mood-angry .eye--l { transform: scaleY(0.8) rotate(18deg); }
+#pet.mood-angry .eye--r { transform: scaleY(0.8) rotate(-18deg); }
+#pet.mood-angry .mouth {
+  border-bottom: none;
+  border-top: 4px solid #b5432f;
+  border-radius: 12px 12px 0 0;
+  top: 70%;
+}
+#pet.mood-angry .egg { border-color: #eab0a0; }
+#pet.mood-angry .mood-icon::after { content: "💢"; }
+#pet.mood-angry { animation: angry-shake 0.5s ease-in-out infinite; }
+@keyframes angry-shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-1.5px); }
+  75% { transform: translateX(1.5px); }
+}
+
+/* ---- 高兴：眼睛弯月、嘴巴大笑、头顶音符 ---- */
+#pet.mood-happy .eye {
+  background: none;
+  border-bottom: 4px solid #3b2f1c;
+  border-radius: 0 0 20px 20px;
+  height: 12px;
+  box-shadow: none;
+}
+#pet.mood-happy .eye::before,
+#pet.mood-happy .eye::after { display: none; }
+#pet.mood-happy .mouth {
+  width: 26px; height: 14px;
+  border-bottom: 4px solid #3b2f1c;
+  border-radius: 0 0 16px 16px;
+}
+#pet.mood-happy .mood-icon { opacity: 0 !important; }  /* 用耳机代替音符 */
+#pet.mood-happy .egg { animation: happy-bounce 0.7s ease-in-out infinite; }
+@keyframes happy-bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* 头戴式耳机：默认隐藏，听歌(高兴)情绪时戴上 */
+.headphone {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 3;
+}
+#pet.mood-happy .headphone { opacity: 1; }
+/* 头顶横梁：环绕脑袋上方的弧 */
+.headphone__band {
+  position: absolute;
+  top: -8px;
+  left: 12%;
+  right: 12%;
+  height: 38px;
+  border: 6px solid #4a4a55;
+  border-bottom: none;
+  border-radius: 44px 44px 0 0;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.15);
+}
+/* 两侧耳罩 */
+.headphone__cup {
+  position: absolute;
+  top: 28%;
+  width: 28px;
+  height: 38px;
+  background: linear-gradient(90deg, #3a3a44 0%, #55555f 100%);
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3), inset 0 0 3px rgba(255,255,255,0.2);
+}
+.headphone__cup--l { left: -7px; }
+.headphone__cup--r { right: -7px; }
+/* 耳罩内圈(海绵垫) */
+.headphone__cup::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 13px; height: 24px;
+  background: #6a6a78;
+  border-radius: 6px;
+}
+/* 听歌时耳机随节奏轻晃 + 蛋蛋随音乐点头 */
+#pet.mood-happy .headphone { animation: hp-bob 0.7s ease-in-out infinite; }
+@keyframes hp-bob {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(2deg); }
+}
+
+/* 从耳机边飘出的音符：默认不显示，听歌时循环上飘 */
+.music-note {
+  position: absolute;
+  font-size: 16px;
+  color: #f19cb0;
+  opacity: 0;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+.music-note--1 { top: 42%; right: -6px; }
+.music-note--2 { top: 42%; left: -6px; }
+.music-note--3 { top: 38%; right: -2px; }
+#pet.mood-happy .music-note--1 { animation: note-float 1.8s ease-out infinite; }
+#pet.mood-happy .music-note--2 { animation: note-float 1.8s ease-out 0.6s infinite; }
+#pet.mood-happy .music-note--3 { animation: note-float 1.8s ease-out 1.2s infinite; }
+@keyframes note-float {
+  0%   { opacity: 0; transform: translateY(0) translateX(0) scale(0.6) rotate(0deg); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-34px) translateX(10px) scale(1.1) rotate(18deg); }
+}
+
+/* ---- 可怜：大水汪汪眼(放大)、含泪不落、嘴巴小抿、微微发抖 ---- */
+#pet.mood-pitiful .eye { transform: scale(1.18); top: 46%; }
+#pet.mood-pitiful .eye::before { width: 10px; height: 10px; }  /* 更大的水润高光 */
+#pet.mood-pitiful .mouth {
+  width: 12px; height: 6px;
+  border-bottom: 3px solid #3b2f1c;
+  border-radius: 0 0 8px 8px;
+}
+#pet.mood-pitiful .mood-icon { opacity: 0 !important; }  /* 不用头顶 emoji */
+/* 眼眶下方汪着一层泪光（不落下）*/
+#pet.mood-pitiful .tear--l,
+#pet.mood-pitiful .tear--r {
+  top: 62%;
+  width: 9px; height: 7px;
+  opacity: 0.85;
+  animation: tear-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes tear-shimmer {
+  0%, 100% { opacity: 0.6; transform: translateY(0) scale(0.9); }
+  50%      { opacity: 0.95; transform: translateY(1px) scale(1.05); }
+}
+/* 楚楚可怜地微微发抖 */
+#pet.mood-pitiful .egg { animation: pitiful-tremble 0.28s ease-in-out infinite; }
+@keyframes pitiful-tremble {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-0.8px); }
+  75% { transform: translateX(0.8px); }
+}
+
+/* ---- 累/困：眼睛完全闭上(弯弯的闭眼线)、嘴巴平、头顶 💤 ---- */
+#pet.mood-tired .eye {
+  background: none;
+  box-shadow: none;
+  height: 8px;
+  border: none;
+  border-bottom: 3px solid #3b2f1c;   /* 下弯的闭眼线(∩)，像安详睡着 */
+  border-radius: 0 0 20px 20px;
+}
+#pet.mood-tired .eye::before,
+#pet.mood-tired .eye::after { display: none; }  /* 去掉高光点 */
+#pet.mood-tired .mouth {
+  width: 16px; height: 0;
+  border-bottom: 3px solid #3b2f1c;
+  border-radius: 0;
+}
+#pet.mood-tired .blush { opacity: 0.5; }
+#pet.mood-tired .mood-icon::after { content: "💤"; }
+#pet.mood-tired .egg { animation: breathe 4.5s ease-in-out infinite; }
+
+/* ---- 伤心：眼睛下垂、嘴巴倒扣小、流泪 ---- */
+#pet.mood-sad .eye--l { transform: rotate(-16deg) scaleY(0.9); }
+#pet.mood-sad .eye--r { transform: rotate(16deg) scaleY(0.9); }
+#pet.mood-sad .mouth {
+  border-bottom: none;
+  border-top: 3px solid #3b2f1c;
+  border-radius: 10px 10px 0 0;
+  width: 16px; top: 72%;
+}
+#pet.mood-sad .blush { opacity: 0; }
+#pet.mood-sad .egg { animation: sad-droop 3s ease-in-out infinite; }
+@keyframes sad-droop {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+
+/* 眼泪：平时隐藏，伤心时从眼睛下方一滴滴滑落 */
+.tear {
+  position: absolute;
+  top: 58%;
+  width: 7px;
+  height: 10px;
+  background: linear-gradient(180deg, rgba(150,200,255,0.7), rgba(90,160,235,0.9));
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+.tear--l { left: 24%; }
+.tear--r { right: 24%; }
+#pet.mood-sad .tear--l { animation: tear-drop 1.6s ease-in infinite; }
+#pet.mood-sad .tear--r { animation: tear-drop 1.6s ease-in 0.8s infinite; }  /* 错开 */
+@keyframes tear-drop {
+  0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+  20%  { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(38px) scale(0.9); }
+}
+
+/* ---- 兴奋：星星眼、嘴巴张大、头顶星星、蹦跳 ---- */
+#pet.mood-excited .eye {
+  background: radial-gradient(circle at 50% 50%, #ffd94a 0%, #ffd94a 40%, #3b2f1c 42%);
+  transform: scale(1.1);
+}
+#pet.mood-excited .mouth {
+  width: 20px; height: 18px;
+  background: #b5432f;
+  border: none;
+  border-radius: 50%;
+  top: 66%;
+}
+#pet.mood-excited .mood-icon { opacity: 0 !important; }  /* 已有星星眼，不用头顶 emoji */
+#pet.mood-excited .egg { animation: excited-jump 0.4s ease-in-out infinite; }
+@keyframes excited-jump {
+  0%,100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.03); }
+}
+
+/* ---- 卖萌：眼睛亮、歪头、腮红加深、头顶爱心 ---- */
+#pet.mood-cute .egg { transform: rotate(-8deg); }
+#pet.mood-cute .eye::before { width: 8px; height: 8px; }
+#pet.mood-cute .blush { opacity: 0.75; background: rgba(255, 130, 150, 0.6); }
+#pet.mood-cute .mouth {
+  width: 14px; height: 8px;
+  border-bottom: 3px solid #3b2f1c;
+  border-radius: 0 0 10px 10px;
+}
+#pet.mood-cute .mood-icon::after { content: "💕"; }
+#pet.mood-cute .egg { animation: cute-tilt 2s ease-in-out infinite; }
+@keyframes cute-tilt {
+  0%,100% { transform: rotate(-8deg); }
+  50% { transform: rotate(4deg); }
+}
+
+/* 走路时优先级最高：盖过任何情绪的 egg 动画（放在最后确保胜出）*/
+#pet.walking .egg { animation: waddle 0.4s ease-in-out infinite !important; }
+
+/* ---- 头顶气泡（纯展示，不拦鼠标）---- */
+.pet-bubble {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 4px;
+  max-height: 88px;
+  overflow: hidden;
+  pointer-events: none;          /* 关键：不影响穿透/点击 */
+  background: #fffdf5;
+  border: 2px solid #c8a86a;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #4a3b24;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+/* hidden 属性被 display:-webkit-box 覆盖了，必须补回来 */
+.pet-bubble[hidden] { display: none !important; }
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pet-bubble:not([hidden]) { animation: bubble-in 0.18s ease-out; }

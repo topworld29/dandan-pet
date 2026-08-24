@@ -1,0 +1,25 @@
+# ============ 密钥 · 绝对不能提交 ============
+backend/config.yaml
+# 只提交这份空模板：backend/config.example.yaml
+
+# ============ 个人数据 ============
+backend/memory.db
+backend/dandan_oc.txt
+
+# ============ 依赖（可还原）============
+node_modules/
+backend/venv/
+backend/__pycache__/
+*.pyc
+
+# ============ 构建产物（可重新打包）============
+dist-backend/
+release/
+
+# ============ 超过 GitHub 100MB 单文件上限 ============
+# opencode.exe 158MB，超过 GitHub 100MB 单文件上限，去官网下载
+dist-opencode/
+
+# ============ 杂项 ============
+.DS_Store
+Thumbs.db

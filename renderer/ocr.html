@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <link rel="stylesheet" href="ocr.css">
+</head>
+<body>
+  <div class="ocr">
+    <div class="ocr__head">
+      <span class="ocr__title">图片识别</span>
+      <button id="closeBtn" class="ocr__close">✕</button>
+    </div>
+    <div class="ocr__body">
+      <div class="ocr__left">
+        <img id="preview" class="ocr__img" alt="截图">
+      </div>
+      <div class="ocr__right">
+        <div id="textArea" class="ocr__text">识别中…</div>
+        <div class="ocr__actions">
+          <button id="copyBtn" class="ocr__btn ocr__btn--copy" type="button">复制原文</button>
+          <button id="transBtn" class="ocr__btn ocr__btn--trans" type="button">翻译</button>
+        </div>
+        <!-- 翻译结果（默认隐藏）-->
+        <div id="transArea" class="ocr__trans" hidden>
+          <div class="ocr__trans-label">译文</div>
+          <div id="transText" class="ocr__trans-text"></div>
+          <div class="ocr__actions">
+            <button id="copyTransBtn" class="ocr__btn ocr__btn--copy" type="button">复制译文</button>
+          </div>
+        </div>
+        <!-- 聊天框：对图中内容提问 -->
+        <div class="ocr__chat">
+          <input id="chatInput" class="ocr__chat-input" type="text" placeholder="对图中内容提问">
+          <button id="chatBtn" class="ocr__btn ocr__btn--send" type="button" title="发送">➤</button>
+        </div>
+        <!-- 聊天历史 -->
+        <div id="chatLog" class="ocr__chat-log"></div>
+      </div>
+    </div>
+  </div>
+  <script src="ocr.js"></script>
+</body>
+</html>

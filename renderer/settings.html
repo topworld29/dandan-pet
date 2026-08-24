@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="settings">
+    <div class="settings__head">
+      <span class="settings__title">⚙ 设置</span>
+      <button id="closeBtn" class="settings__close">✕</button>
+    </div>
+    <div class="settings__body">
+      <label class="settings__label" for="providerBtn">大模型服务</label>
+      <div class="settings__select-row">
+        <button id="providerBtn" class="settings__input settings__select" type="button">
+          <span id="providerLabel"></span>
+        </button>
+      </div>
+      <div id="providerList" class="settings__droplist" hidden></div>
+
+      <label class="settings__label" for="keyInput">API Key</label>
+      <div class="settings__key-row">
+        <input id="keyInput" class="settings__input settings__key-input" type="password" placeholder="sk-..." autocomplete="off">
+        <button id="keyClear" class="settings__clearx" type="button" title="清除">✕</button>
+      </div>
+      <p class="settings__note">聊天、翻译、识图、干活都用上面选中这家的 Key。两家各存各的，切回来不用重填。存在你电脑本地，不会上传。</p>
+
+      <label class="settings__label" for="modelInput">模型</label>
+      <div class="settings__dir-row">
+        <input id="modelInput" class="settings__input settings__dir-input" placeholder="点一下从列表选，或直接手打" autocomplete="off">
+        <button id="modelRefresh" class="settings__browse" type="button" title="从官方重新拉取模型列表">↻</button>
+      </div>
+      <div id="modelList" class="settings__modellist" hidden></div>
+      <p id="modelHint" class="settings__note"></p>
+      <p class="settings__note">识图和干活用的是同一个模型。选了不支持图片输入的模型，截图识别会报错。</p>
+
+      <label class="settings__label" for="workDir">工作目录</label>
+      <div class="settings__dir-row">
+        <input id="workDir" class="settings__input settings__dir-input" type="text" placeholder="蛋蛋干活时的工作目录（绝对路径）">
+        <button id="browseBtn" class="settings__browse" type="button" title="选择文件夹">📁</button>
+      </div>
+      <p class="settings__note">蛋蛋创建/修改文件时只在这个目录下操作。</p>
+
+      <label class="settings__label" for="scTranslate">翻译快捷键</label>
+      <div class="settings__sc-row">
+        <input id="scTranslate" class="settings__input settings__shortcut" type="text" readonly placeholder="点这里，按下快捷键">
+        <button id="scTranslateReset" class="settings__reset" type="button">恢复默认</button>
+      </div>
+      <label class="settings__label" for="scOcr">识图快捷键</label>
+      <div class="settings__sc-row">
+        <input id="scOcr" class="settings__input settings__shortcut" type="text" readonly placeholder="点这里，按下快捷键">
+        <button id="scOcrReset" class="settings__reset" type="button">恢复默认</button>
+      </div>
+      <p class="settings__note">点击输入框后直接按下想要的组合键（如 Ctrl+Q）。按 Esc 取消录制。</p>
+
+      <div class="settings__actions">
+        <button id="saveBtn" class="settings__save" type="button">保存</button>
+      </div>
+      <p id="status" class="settings__status"></p>
+    </div>
+  </div>
+  <script src="settings.js"></script>
+</body>
+</html>

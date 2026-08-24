@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <link rel="stylesheet" href="pet.css">
+</head>
+<body>
+  <!-- stage 撑满整个透明窗口；pet 是蛋蛋本体（阶段 0 用占位蛋） -->
+  <div id="stage">
+    <!-- 头顶气泡：聊天窗关着时的主动提醒/回复展示（不拦鼠标）-->
+    <div id="bubble" class="pet-bubble" hidden></div>
+    <div id="pet" title="蛋蛋（双击聊天，右键菜单）">
+      <!-- 情绪图标（头顶，随情绪显示不同符号）-->
+      <div class="mood-icon"></div>
+      <!-- 头戴式耳机（听歌情绪时显示）-->
+      <div class="headphone">
+        <div class="headphone__band"></div>
+        <div class="headphone__cup headphone__cup--l"></div>
+        <div class="headphone__cup headphone__cup--r"></div>
+        <span class="music-note music-note--1">♪</span>
+        <span class="music-note music-note--2">♫</span>
+        <span class="music-note music-note--3">♪</span>
+      </div>
+      <div class="egg">
+        <div class="bow"></div>
+        <div class="eye eye--l"></div>
+        <div class="eye eye--r"></div>
+        <div class="tear tear--l"></div>
+        <div class="tear tear--r"></div>
+        <div class="blush blush--l"></div>
+        <div class="blush blush--r"></div>
+        <div class="mouth"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="pet.js"></script>
+</body>
+</html>

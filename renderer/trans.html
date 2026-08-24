@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <link rel="stylesheet" href="trans.css">
+</head>
+<body>
+  <!-- 外层留白：给面板投影留空间（对应 WPF Grid Margin=16） -->
+  <div class="trans-wrap">
+    <!-- 液态玻璃主面板（对应 WPF Border CornerRadius=24） -->
+    <div id="trans" class="trans">
+      <!-- 顶部镜面高光层 -->
+      <div class="trans__gloss"></div>
+      <!-- 关闭按钮 -->
+      <button id="closeBtn" class="trans__close" title="关闭">✕</button>
+      <!-- 译文正文 -->
+      <div class="trans__scroll">
+        <div id="body" class="trans__body"></div>
+      </div>
+      <!-- 复制按钮（占满整行） -->
+      <div class="trans__buttons">
+        <button id="copyBtn" class="trans__btn" title="复制译文">复制</button>
+      </div>
+    </div>
+  </div>
+  <script src="trans.js"></script>
+</body>
+</html>

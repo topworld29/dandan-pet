@@ -1,0 +1,278 @@
+/* ============================================================
+   设置窗 样式 (settings.css)
+   白底圆角、轻投影，与翻译浮窗风格统一
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  font-family: "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.settings__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f8b0c4 0%, #f19cb0 100%);
+  color: #fff;
+  -webkit-app-region: drag;
+}
+.settings__title { font-size: 16px; font-weight: 800; }
+.settings__close {
+  border: none;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  -webkit-app-region: no-drag;
+}
+.settings__close:hover { background: rgba(255,255,255,0.4); }
+
+.settings__body {
+  padding: 18px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+/* 表单项一律不收缩：内容超过窗高时应该让 body 出滚动条，
+   而不是把某一项（尤其是带 overflow 的模型列表）压扁。 */
+.settings__body > * { flex: none; }
+.settings__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #555;
+}
+.settings__input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #2c2f36;
+  outline: none;
+  -webkit-app-region: no-drag;
+}
+.settings__input:focus { border-color: #f7a0b8; }
+/* 大模型服务下拉：跟输入框长一样，避免系统原生样式跳脱。
+   关掉系统原生箭头，换成自画的 chevron —— 这样才能控制它的位置和颜色，
+   对齐到跟下面 Key 框那个 ✕ 同一条竖线上（.settings__clearx 是 right:8px + width:20px，
+   中心落在距右边 18px；所以 12px 宽的箭头右边缘要放在 12px 处，中心正好也是 18px）。*/
+/* 注意：不能用 background-image + data: URI 画箭头 —— settings.html 的 CSP 是
+   default-src 'self'，img-src 回退到它，data: 会被直接拦掉，图静默不显示。
+   所以改成伪元素，且定位参数与 .settings__clearx 完全一致
+   （right:8px / width:20px / height:20px / translateY(-50%) / #c8c8c8 / 13px），
+   对齐就是结构性保证的，不是算出来的。*/
+.settings__select-row { position: relative; display: flex; }
+.settings__select-row::after {
+  /* 不用 "⌄" 字形：它在行盒里的高低随字体变，实测比 ✕ 低了约 3px，压不准。
+     改成 7x7 方块只留右、下两条边、转 45°，形状和位置完全可控。
+     ✕ 的中心在距右边 18px（right:8px + width:20px 的一半），这里让方块中心落到同一点。*/
+  content: "";
+  position: absolute;
+  right: 14.5px;            /* 7px 宽 → 中心 14.5 + 3.5 = 18px，与 ✕ 同一条竖线 */
+  top: 50%;
+  width: 7px; height: 7px;
+  box-sizing: border-box;
+  border-right: 1.6px solid #c8c8c8;
+  border-bottom: 1.6px solid #c8c8c8;
+  /* 先上移半个自身高居中，再上移 2px —— 旋转后"墨迹"集中在方块下半部，
+     不补这 2px 看着会偏低 */
+  transform: translateY(-50%) translateY(-2px) rotate(45deg);
+  pointer-events: none;     /* 别挡住点击下拉 */
+}
+/* 它现在是个 <button>，不是 <select>：原生 select 展开的弹层由 Chromium/系统画，
+   hover 高亮走系统蓝，CSS 改不动，所以换成下面 .settings__droplist 自绘。*/
+.settings__select {
+  flex: 1;
+  width: 100%;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;                /* 与 .settings__key-input 一致，给箭头让位 */
+  background-color: #fff;
+  text-align: left;
+  font-family: inherit;               /* button 不继承字体，要显式写 */
+  font-size: 15px;
+  color: #2c2f36;
+  transition: background-color .12s ease;
+}
+.settings__select:hover { background-color: #f4f4f4; }   /* 淡灰，不是粉 */
+
+/* 服务下拉的自绘列表：白底，hover 淡灰 */
+.settings__droplist {
+  flex: none;                         /* 同坑9：flex 列里带 overflow 的元素会被压扁 */
+  max-height: 176px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #fff;
+}
+.settings__droplist[hidden] { display: none !important; }   /* 同坑6 */
+.settings__dropitem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  border: none;
+  background: #fff;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #2c2f36;
+  cursor: pointer;
+  flex: none;
+  -webkit-app-region: no-drag;
+}
+.settings__dropitem:hover { background: #f4f4f4; }          /* 淡淡的高亮 */
+.settings__dropitem.is-current { font-weight: 700; }        /* 当前项只加粗，底色仍是白 */
+.settings__dropitem__tick { color: #c8c8c8; font-size: 12px; }
+.settings__droplist::-webkit-scrollbar { width: 8px; }
+.settings__droplist::-webkit-scrollbar-track { background: transparent; }
+.settings__droplist::-webkit-scrollbar-thumb { background: #e3e3e3; border-radius: 4px; }
+.settings__dir-row { display: flex; gap: 8px; }
+.settings__dir-input { flex: 1; }
+
+/* Key 输入行：输入框右侧带清除小叉号 */
+.settings__key-row { position: relative; display: flex; }
+.settings__key-input { flex: 1; padding-right: 34px; }
+.settings__clearx {
+  position: absolute;
+  right: 8px; top: 50%;
+  transform: translateY(-50%);
+  width: 20px; height: 20px;
+  border: none;
+  background: transparent;
+  color: #c8c8c8;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  -webkit-app-region: no-drag;
+}
+.settings__clearx:hover { color: #999; }
+
+/* 快捷键行：短输入框 + 恢复默认按钮 */
+.settings__sc-row { display: flex; gap: 8px; align-items: center; }
+.settings__shortcut {
+  flex: 0 0 150px;   /* 框改短 */
+  cursor: pointer;
+  background: #fff;   /* 白色底 */
+  letter-spacing: 0.5px;
+}
+.settings__shortcut.recording { border-color: #f7a0b8; background: #fff; color: #d0567f; }
+.settings__reset {
+  border: 1px solid #e0d4d9;
+  background: #fff;   /* 白色底 */
+  color: #c76b8a;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+}
+.settings__reset:hover { background: #faf6f7; }
+.settings__browse {
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  font-size: 18px;
+  padding: 0 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+}
+.settings__browse:hover { background: #eee; }
+/* 模型列表：条数多就自己出滚动条，滚轮可上下翻 */
+.settings__modellist {
+  /* flex:none 必须有！父级 .settings__body 是 flex 列，子项默认 flex-shrink:1；
+     而本元素设了 overflow-y 会让 min-height:auto 解析成 0，于是内容一多就被压成一条线。
+     max-height 只限上限，防不住收缩。 */
+  flex: none;
+  max-height: 176px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #fff;
+}
+/* 坑6 同款：[hidden] 会被 display:flex 盖掉，必须显式 none */
+.settings__modellist[hidden] { display: none !important; }
+.settings__modelitem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  border: none;
+  background: #fff;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #2c2f36;
+  cursor: pointer;
+  flex: none;
+  -webkit-app-region: no-drag;
+}
+.settings__modelitem:hover { background: #f4f4f4; }          /* 与服务下拉同款淡灰 */
+.settings__modelitem.is-current { font-weight: 700; }        /* 当前项只加粗，底色仍是白 */
+.settings__modellist::-webkit-scrollbar { width: 8px; }
+.settings__modellist::-webkit-scrollbar-track { background: transparent; }
+.settings__modellist::-webkit-scrollbar-thumb { background: #e3e3e3; border-radius: 4px; }
+.settings__modellist::-webkit-scrollbar-thumb:hover { background: #cfcfcf; }
+.settings__modellist__empty { padding: 7px 10px; font-size: 12px; color: #999; }
+
+.settings__note.ok { color: #4a9d5f; }
+.settings__note.err { color: #d05a6e; }
+.settings__note {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.4;
+}
+.settings__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.settings__save {
+  border: none;
+  background: linear-gradient(135deg, #f7a0b8 0%, #f08ca4 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 8px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.settings__save:hover { background: linear-gradient(135deg, #f08ca4 0%, #e87a9e 100%); }
+.settings__status {
+  font-size: 13px;
+  color: #999;
+  min-height: 20px;
+}
+.settings__status.ok { color: #4caf50; }
+.settings__status.err { color: #e74c3c; }

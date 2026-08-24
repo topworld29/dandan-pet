@@ -1,0 +1,194 @@
+/* ============================================================
+   图片识别窗 样式 (ocr.css)
+   左右分栏：左侧截图，右侧识别结果+翻译+聊天
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  font-family: "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ocr {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ocr__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f8b0c4 0%, #f19cb0 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  -webkit-app-region: drag;
+}
+.ocr__close {
+  border: none;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  -webkit-app-region: no-drag;
+}
+.ocr__close:hover { background: rgba(255,255,255,0.4); }
+
+.ocr__body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 左侧：截图预览 */
+.ocr__left {
+  flex: 1;
+  padding: 12px;
+  overflow: auto;
+  border-right: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+}
+.ocr__img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 右侧：识别结果 + 翻译 + 聊天 */
+.ocr__right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+/* 识别结果 */
+.ocr__text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2c2f36;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text;
+  padding: 8px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  min-height: 90px;
+  max-height: 220px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.ocr__text.error { color: #e74c3c; }
+
+/* 按钮行 */
+.ocr__actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ocr__btn {
+  border: none;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 7px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.ocr__btn--copy {
+  background: #f0f0f0;
+  color: #555;
+}
+.ocr__btn--copy:hover { background: #e4e4e4; }
+.ocr__btn--trans {
+  background: linear-gradient(135deg, #f8b0c4 0%, #f19cb0 100%);
+  color: #fff;
+}
+.ocr__btn--trans:hover { background: linear-gradient(135deg, #f19cb0 0%, #ea8aaa 100%); }
+/* 纸飞机发送按钮 */
+.ocr__btn--send {
+  background: linear-gradient(135deg, #f8b0c4 0%, #f19cb0 100%);
+  color: #fff;
+  font-size: 16px;
+  padding: 7px 14px;
+  line-height: 1;
+}
+.ocr__btn--send:hover { background: linear-gradient(135deg, #f19cb0 0%, #ea8aaa 100%); }
+.ocr__btn:disabled { opacity: 0.5; cursor: default; }
+
+/* 翻译结果 */
+.ocr__trans {
+  margin-bottom: 10px;
+}
+.ocr__trans-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #999;
+  margin-bottom: 4px;
+}
+.ocr__trans-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2c2f36;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text;
+  padding: 8px;
+  background: #f0f8ff;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* 聊天框 */
+.ocr__chat {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.ocr__chat-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #2c2f36;
+  outline: none;
+  -webkit-app-region: no-drag;
+}
+.ocr__chat-input:focus { border-color: #f7a0b8; }
+.ocr__chat-input::placeholder { color: #ccc; }
+
+/* 聊天历史 */
+.ocr__chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-msg { font-size: 13px; line-height: 1.5; }
+.chat-msg--q { color: #666; }
+.chat-msg--q::before { content: "Q: "; font-weight: 700; }
+.chat-msg--a { color: #2c2f36; padding: 6px 8px; background: #f9f9f9; border-radius: 8px; }
+.chat-msg--a::before { content: "A: "; font-weight: 700; color: #f19cb0; }
+.chat-msg--loading { color: #aaa; font-style: italic; }

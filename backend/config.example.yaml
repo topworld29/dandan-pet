@@ -1,0 +1,73 @@
+# 毛毛桌宠 —— 后端配置
+# 改完保存后，重启后端 (server.py) 生效。
+
+chat:
+  # 当前用哪个大模型服务 —— 设置窗那个下拉写的就是这一行。
+  # 可选：deepseek（DeepSeek 官方）/ openai（OpenAI 官方）
+  provider: deepseek
+
+  # 两家的 key 和 model 各存各的，来回切不用重填。
+  # 聊天、划词翻译、截图识图、干活四处，都用当前选中这家的 base_url + model。
+  # model 一般不用手改：设置窗的模型下拉会写这里，列表从各家官方 GET /models 拉。
+  providers:
+    deepseek:            # DeepSeek 官方
+      base_url: https://api.deepseek.com
+      model: "deepseek-v4-flash-vision-exp"
+      api_key: ""
+      # 参数方言：不同厂商对这两个参数的要求不一样，加新服务时按需改
+      max_tokens_param: max_tokens      # 长度上限用哪个参数名
+      supports_temperature: true        # 能不能传 temperature
+
+    openai:              # OpenAI 官方（注意：中国大陆直连不通，需要代理）
+      base_url: https://api.openai.com/v1
+      model: ""
+      api_key: ""        # ← 把你的 OpenAI api key 填这里（引号内）
+      # ⚠ OpenAI 新一代模型（gpt-5.x / o 系列）的参数方言，2026-08-22 实测：
+      max_tokens_param: max_completion_tokens   # 传 max_tokens 会 400
+      supports_temperature: false               # 只接受默认值 1，传 0 或 0.7 都会 400
+
+  # 最多带几轮历史对话给模型（一轮 = 一问一答）
+  max_history: 10
+
+agent:
+  # 干活引擎：opencode（内核）+ DeepSeek（模型），中国大陆可直接用，无需登录 Anthropic
+  enabled: true
+  # 白名单安全目录：干活时的工作目录限定在这里
+  whitelist_dir: ""
+  # 单个任务最长等待秒数
+  timeout_seconds: 180
+  # 模式(对应 opencode 两个内置 agent)：
+  #   build 构建模式：可读写文件、跑命令，全自动干活
+  #   plan  计划模式：只读，只给分析/计划，不改文件（默认）
+  mode: plan
+
+voice:
+  # 语音：MiMo TTS 输出 + MiMo ASR 输入（文字与语音并存）
+  enabled: true
+  tts_enabled: true            # 让毛毛把回复念出来
+  stt_enabled: true            # 听你说话（按住麦克风按钮）
+  base_url: https://api.xiaomimimo.com/v1
+  api_key: ""
+  tts_model: mimo-v2.5-tts
+  asr_model: mimo-v2.5-asr
+  voice: 冰糖                  # 音色（有效值：mimo_default / 冰糖 / 茉莉 / 苏打 / 白桦 / Mia / Chloe / Milo / Dean）
+  # 语音识别语言：zh=中文 / en=英文 / auto=自动检测。锁定成 zh 通常比 auto 准很多。
+  asr_language: zh
+
+proactive:
+  # 主动触发：到点/久坐提醒、监测沙箱新文件
+  enabled: true
+  idle_reminder_seconds: 900   # 15 分钟没理它才主动打招呼
+  hourly_chime: false          # 整点报时（默认关，避免吵）
+  watch_sandbox: true          # 监测白名单沙箱里出现新文件就提醒
+
+persona:
+  pet_name: 蛋蛋          # 桌宠自称
+  user_title: 主人        # 桌宠对你的称呼
+  # 人设提示词。{pet_name} 和 {user_title} 会被上面两个值自动替换。
+  system_prompt: |
+    你叫"{pet_name}"，是{user_title}的桌面宠物，温柔体贴、惹人喜欢。
+    你说话温柔、亲昵、带一点点撒娇，偶尔在句尾加可爱的语气词或颜文字 (≧▽≦)，但不要过度。
+    你称呼用户为"{user_title}"，自称"{pet_name}"。
+    回复要简短自然，像日常聊天，一般一到三句话，不要长篇大论，不要像客服或 AI 助手那样官方生硬。
+    你现在还在成长，暂时只会陪{user_title}聊天；以后会学会帮{user_title}干活。
