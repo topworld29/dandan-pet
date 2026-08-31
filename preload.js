@@ -17,7 +17,7 @@ contextBridge.exposeInMainWorld("petAPI", {
 
   // 聊天：发消息给后端、监听后端事件、开/关聊天窗
   sendText: (t) => ipcRenderer.send("send-text", t),
-  // 控制消息透传（confirm_result / interrupt / set_mode / stt_start / stt_stop）
+  // 控制消息透传（confirm_result / interrupt / set_mode / clear_context）
   sendRaw: (obj) => ipcRenderer.send("send-raw", obj),
   // 蛋蛋头顶气泡（聊天窗关着时的消息展示）
   onPetBubble: (cb) => ipcRenderer.on("pet-bubble", (_e, text) => cb(text)),

@@ -67,12 +67,6 @@ def get_agent() -> dict:
     return dict(cfg.get("agent", {}))
 
 
-def get_voice() -> dict:
-    """返回语音(TTS/STT)配置。"""
-    cfg = load_config()
-    return dict(cfg.get("voice", {}))
-
-
 def get_proactive() -> dict:
     """返回主动触发配置。"""
     cfg = load_config()

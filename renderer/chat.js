@@ -14,7 +14,6 @@
   const closeBtn = document.getElementById("closeBtn");
   const conn = document.getElementById("conn");
   const modeSelect = document.getElementById("modeSelect");
-  const muteBtn = document.getElementById("muteBtn");
   const clearBtn = document.getElementById("clearBtn");
   const runState = document.getElementById("runState");
   const stopBtn = document.getElementById("stopBtn");
@@ -89,28 +88,6 @@
   });
   closeBtn.addEventListener("click", () => window.petAPI.hideChat());
 
-  /* ---- 🎤 点击语音输入：点一下开始，不说话自动停 / 再点手动停 ---- */
-  const micBtn = document.getElementById("micBtn");
-  let recording = false;
-  function micStart() {
-    if (recording) return;
-    recording = true;
-    micBtn.classList.add("recording");
-    micBtn.title = "点击停止";
-    window.petAPI.sendRaw({ type: "stt_start" });
-  }
-  function micStop(sendStop) {
-    if (!recording) return;
-    recording = false;
-    micBtn.classList.remove("recording");
-    micBtn.title = "点击语音输入";
-    if (sendStop) window.petAPI.sendRaw({ type: "stt_stop" });
-  }
-  micBtn.addEventListener("click", () => {
-    if (recording) micStop(true);   // 手动停：发 stt_stop
-    else micStart();
-  });
-
   /* ---- 停止：打断干活/思考中的回复 ---- */
   stopBtn.addEventListener("click", () => {
     window.petAPI.sendRaw({ type: "interrupt" });
@@ -130,23 +107,6 @@
     window.petAPI.sendRaw({ type: "clear_context" });
     log.innerHTML = "";
     addBubble("ai", "对话已清空，我们重新开始聊吧~", "sys");
-  });
-
-  /* ---- 静音：持久开关。开=蛋蛋不再朗读；点一下切回来 ---- */
-  let muted = false;
-  muteBtn.addEventListener("click", () => {
-    muted = !muted;
-    window.petAPI.sendRaw({ type: "set_mute", muted });
-    if (muted) {
-      window.petAPI.sendRaw({ type: "mute" }); // 立刻停掉当前正在念的
-      muteBtn.classList.add("muted");
-      muteBtn.textContent = "🔇";
-      muteBtn.title = "点一下恢复朗读";
-    } else {
-      muteBtn.classList.remove("muted");
-      muteBtn.textContent = "🔊";
-      muteBtn.title = "让蛋蛋闭嘴（停止朗读）";
-    }
   });
 
   /* ---- 确认气泡（同意 / 先不做）---- */
@@ -254,22 +214,6 @@
         window.petAPI.openSettings();
         break;
 
-      case "stt_text": // 语音转文字：填进输入框，用户确认后再发
-        micStop(false);
-        if (m.text) {
-          input.value = (input.value ? input.value + " " : "") + m.text;
-          input.focus();
-          autoGrow();
-        } else {
-          // 没听清：轻提示，不打扰
-          input.placeholder = "没太听清，再说一遍…";
-          setTimeout(() => { input.placeholder = "和蛋蛋说点什么…"; }, 2500);
-        }
-        break;
-
-      case "stt_auto_stop": // 后端因静音自动停止了录音，复位麦克风图标
-        micStop(false);
-        break;
     }
   });
 

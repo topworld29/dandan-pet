@@ -31,12 +31,8 @@ from agent_runner import (
 from chat_llm import ChatError, chat, reset_history, did_compact
 from config import get_agent, get_proactive, reload_config
 from permission import needs_confirm
-from config import get_voice
 from proactive import Proactive
 from router import route
-from tts import speak as tts_speak
-import tts
-import stt
 
 # Windows 控制台默认 GBK，回复里的颜文字/emoji 会让 print 崩溃，进而拖垮连接。
 # 把日志输出强制为 UTF-8，编不出的字符用替代符，绝不抛异常。
@@ -48,8 +44,8 @@ for _stream in (sys.stdout, sys.stderr):
 
 app = FastAPI(title="毛毛桌宠后端", version="0.3.0")
 
-# 运行时权限模式覆盖（None 表示用 config.yaml 里的默认）+ 静音开关
-_runtime = {"mode": None, "muted": False}
+# 运行时权限模式覆盖（None 表示用 config.yaml 里的默认）
+_runtime = {"mode": None}
 
 # 活动连接集合 + 主动触发引擎
 _clients: set[WebSocket] = set()
@@ -133,8 +129,6 @@ async def _send(ws: WebSocket, obj: dict) -> None:
 
 async def _send_reply(ws: WebSocket, text: str) -> None:
     await _send(ws, {"type": "reply", "text": text})
-    if not _runtime["muted"]:
-        tts_speak(text)  # 同时把回复念出来（异步，未启用/静音则跳过）
 
 
 # ---------- 任务流式执行 ----------
@@ -297,41 +291,13 @@ async def websocket_endpoint(ws: WebSocket):
             mtype = data.get("type") if isinstance(data, dict) else None
 
             if mtype == "interrupt":
-                # 打断：干活任务杀子进程；聊天回复标记丢弃；顺手停朗读
+                # 打断：干活任务杀子进程；聊天回复标记丢弃
                 state["cancel_reply"] = True
-                tts.stop()
                 proc = state.get("proc")
                 if proc and proc.returncode is None:
                     state["interrupted"] = True
                     _kill_tree(proc)
                 print(f"[{_now()}] 收到中断指令", flush=True)
-                continue
-
-            if mtype == "stt_start":
-                if get_voice().get("stt_enabled", False):
-                    try:
-                        stt.recorder.start()
-                        state["stt_finishing"] = False
-                        print(f"[{_now()}] 开始录音", flush=True)
-                        asyncio.create_task(_watch_silence())
-                    except Exception as e:
-                        print(f"[{_now()}] 录音启动失败：{e}", flush=True)
-                continue
-
-            if mtype == "stt_stop":
-                asyncio.create_task(_finish_stt())
-                continue
-
-            if mtype == "mute":
-                tts.stop()  # 让蛋蛋立刻闭嘴
-                print(f"[{_now()}] 停止朗读", flush=True)
-                continue
-
-            if mtype == "set_mute":
-                _runtime["muted"] = bool(data.get("muted"))
-                if _runtime["muted"]:
-                    tts.stop()
-                print(f"[{_now()}] 静音开关 → {_runtime['muted']}", flush=True)
                 continue
 
             if mtype == "reload_config":
@@ -385,45 +351,6 @@ async def websocket_endpoint(ws: WebSocket):
         while True:
             user_text = await queue.get()
             await _handle_user_text(ws, user_text, state)
-
-    async def _watch_silence():
-        """录音期间轮询：检测到持续静音就自动停止并识别，并通知前端复位麦克风。
-        最多轮询 300 秒（5 分钟），超时自动停止（防止无限循环）。"""
-        max_ticks = 300 * 5  # 每 0.2 秒一次，共 5 分钟
-        for _ in range(max_ticks):
-            await asyncio.sleep(0.2)
-            if stt.recorder._stream is None:  # 已被手动停止
-                return
-            if stt.recorder.silent_done():
-                print(f"[{_now()}] 静音自动停止", flush=True)
-                await _send(ws, {"type": "stt_auto_stop"})
-                await _finish_stt()
-                return
-        # 超时保护：如果录音超过 5 分钟还没停，自动结束
-        print(f"[{_now()}] 录音超时(5分钟)，自动停止", flush=True)
-        await _send(ws, {"type": "stt_auto_stop"})
-        await _finish_stt()
-
-    async def _finish_stt():
-        """停止录音 → 转文字 → 在窗口回显 → 当作用户消息处理。"""
-        if state.get("stt_finishing"):
-            return  # 防手动停止和静音自动停止重复触发
-        state["stt_finishing"] = True
-        try:
-            wav = await asyncio.to_thread(stt.recorder.stop)
-            if not wav:
-                return
-            text = (await asyncio.to_thread(stt.transcribe, wav) or "").strip()
-            print(f"[{_now()}] 语音识别：{text!r}", flush=True)
-            if not text:
-                await _send(ws, {"type": "stt_text", "text": ""})  # 空：前端提示没听清
-                return
-            # 语音转文字：填进输入框，由用户确认后再发送（不直接处理）
-            await _send(ws, {"type": "stt_text", "text": text})
-        except Exception as e:
-            print(f"[{_now()}] 语音处理出错：{e}", flush=True)
-        finally:
-            state["stt_finishing"] = False
 
     rtask = asyncio.create_task(reader())
     wtask = asyncio.create_task(worker())

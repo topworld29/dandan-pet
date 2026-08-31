@@ -41,19 +41,6 @@ agent:
   #   plan  计划模式：只读，只给分析/计划，不改文件（默认）
   mode: plan
 
-voice:
-  # 语音：MiMo TTS 输出 + MiMo ASR 输入（文字与语音并存）
-  enabled: true
-  tts_enabled: true            # 让毛毛把回复念出来
-  stt_enabled: true            # 听你说话（按住麦克风按钮）
-  base_url: https://api.xiaomimimo.com/v1
-  api_key: ""
-  tts_model: mimo-v2.5-tts
-  asr_model: mimo-v2.5-asr
-  voice: 冰糖                  # 音色（有效值：mimo_default / 冰糖 / 茉莉 / 苏打 / 白桦 / Mia / Chloe / Milo / Dean）
-  # 语音识别语言：zh=中文 / en=英文 / auto=自动检测。锁定成 zh 通常比 auto 准很多。
-  asr_language: zh
-
 proactive:
   # 主动触发：到点/久坐提醒、监测沙箱新文件
   enabled: true

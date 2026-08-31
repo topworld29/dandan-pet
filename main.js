@@ -480,7 +480,7 @@ function createChatWindow() {
   // 普通窗口（不置顶）：点别的窗口会正常盖住它，点它/点标题栏又正常浮上来，
   // 与其它软件的窗口行为一致（曾试过置顶方案——盖住别的窗口，用户不要）
   chatWin = new BrowserWindow({
-    // 520 = 工具条（模式选择+静音+清空+干活中+中断）一行放下不换行所需宽度（实测 512 + 余量）
+    // 520 = 工具条（模式选择+清空+干活中+中断）一行放下不换行所需宽度
     width: 520, height: 520, show: false, frame: false, resizable: true,
     skipTaskbar: true, hasShadow: false, minWidth: 300, minHeight: 360,
     transparent: true,  // 圆角透明背景
