@@ -823,20 +823,22 @@ ipcMain.on("settings-save-model-config", (_e, payload) => {
 });
 // 工作目录：读写 config.yaml 的 agent.whitelist_dir
 function getWorkDirFromConfig() {
-  try {
-    const yaml = fs.readFileSync(CONFIG_YAML, "utf8");
-    const m = yaml.match(/whitelist_dir:\s*["']([^"']+)["']/);
-    return m ? m[1] : "";
-  } catch (e) { return ""; }
+  // 读走 js-yaml 真解析（与 readConfig 一致）。此前用正则、且只认带引号的值，
+  // 手写成 whitelist_dir: C:/x（合法 YAML）会被当成没配置。
+  const agent = readConfig().agent || {};
+  return String(agent.whitelist_dir || "");
 }
 function setWorkDirInConfig(dir) {
   try {
-    const cfgPath = CONFIG_YAML;
-    let yaml = fs.readFileSync(cfgPath, "utf8");
+    const src = fs.readFileSync(CONFIG_YAML, "utf8");
     // Windows 路径的反斜杠在 YAML 双引号里会被当成转义符（\U 等），统一转成正斜杠
     const safeDir = String(dir || "").replace(/\\/g, "/");
-    yaml = yaml.replace(/(whitelist_dir:\s*)["'][^"']*["']/, '$1"' + safeDir + '"');
-    fs.writeFileSync(cfgPath, yaml, "utf8");
+    // 只替换目标那一行，行尾注释原样保留；值带不带引号都能匹配。
+    // 用替换【函数】而不是替换字符串：路径含 $& / $1 这类字符时不会被当成反向引用展开。
+    const row = /^(\s*whitelist_dir:)[ \t]*(?:"[^"]*"|'[^']*'|[^#\r\n]*?)([ \t]+#.*|[ \t]*)$/m;
+    if (!row.test(src)) return false;   // 没匹配上就如实返回 false，不能谎报保存成功
+    const out = src.replace(row, (_m, head, tail) => head + " " + JSON.stringify(safeDir) + tail);
+    fs.writeFileSync(CONFIG_YAML, out, "utf8");
     return true;
   } catch (e) { return false; }
 }
