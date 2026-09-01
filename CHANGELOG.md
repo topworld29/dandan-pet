@@ -4,15 +4,31 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。日期为该版本实际完成的日期。
 
-## [未发布]
+## [0.2.2] - 2026-09-02
+
+### 新增
+
+- 补齐对外文档：README、架构说明、MIT 许可证、隐私说明、安全说明、Issue 模板，为公开发布做准备。
+
+### 变更
+
+- **后端服务名与版本号对齐项目现状**。FastAPI 应用标题由「毛毛桌宠后端」改为「蛋蛋桌宠后端」，`GET /health` 返回的 `service` 字段由 `maomao-backend` 改为 `dandan-backend`，返回的版本号也不再单独硬编码，改为跟随 `package.json`。改名之前，健康检查的返回看起来像另一个项目的后端。
+- `package.json` 的 `author` 统一为 `topworld29`，与 `LICENSE` 里的署名保持一致，不再一个项目两个作者名。
+- **`requirements.txt` 补齐三个直接依赖并锁定版本**：`APScheduler`（`proactive.py` 的定时器）、`watchdog`（沙箱文件监测）、`websockets`（`test_echo.py`）。此前清单里只有 `fastapi` / `uvicorn[standard]` / `openai` / `PyYAML`，在干净环境里照着装完，后端会因为缺包直接起不来。
 
 ### 移除
 
 - **彻底移除语音功能（TTS / ASR）**（2026-08-31）。删除后端的 `tts.py` 与 `stt.py`，移除聊天窗的静音按钮和麦克风按钮，配置文件里的整个 `voice` 段一并删除。蛋蛋现在只用文字气泡说话，不再朗读、也不再录音。相关依赖同步从后端依赖清单中去掉。
 
-### 新增
+### 修复
 
-- 补齐对外文档：README、架构说明、MIT 许可证、隐私说明、安全说明、Issue 模板，为公开发布做准备。
+- **久坐提醒的代码默认值由 90 秒改为 900 秒**，与配置模板 `config.example.yaml` 里写的值对上——此前两处差了 10 倍。配置里没写 `proactive.idle_reminder_seconds` 时，蛋蛋不会再每一分半钟就凑上来打一次招呼。
+
+### 安全
+
+- **配置缺失或无法识别时，默认模式改为只读**。此前配置里没写 `agent.mode`、或写了后端不认识的值，都会兜底成 `build`——那是可以读写文件、跑命令的模式。缺信息的时候应该落在权限更小的一侧，现已一律兜底成 `plan`（只读）。
+- **旧模式名的映射修正**。`strict` / `bc` / `default` 这几个历史遗留的模式名此前统统被映射成 `build`，但它们的原意是「动手之前先问我」，方向正好反了。现在只有明确表示放行的 `auto` / `acceptEdits` 才映射到 `build`，其余一律按 `plan` 处理。
+- **前端传来无法识别的模式时同样兜底为 `plan`**。`set_mode` 消息里的 `mode` 不是 `build` / `plan` 时，此前回落到 `build`，现改为 `plan`，与配置侧的兜底方向保持一致——两条路径不会再一个收紧、一个放开。
 
 ## [0.2.1] - 2026-08-22
 

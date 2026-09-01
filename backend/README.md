@@ -34,7 +34,7 @@
 |------|------|
 | `{"text": "..."}` | 用户消息。也接受**非 JSON 的纯文本**，整条当作用户输入。经 `router` 判成 chat 或 task 后分别处理。 |
 | `{"type": "interrupt"}` | 中断。正在跑的干活任务杀掉整棵子进程树；正在等的闲聊回复打上标记，回来后直接丢弃不显示。 |
-| `{"type": "set_mode", "mode": "build", "silent": false}` | 切换运行模式，`mode` 取 `build` 或 `plan`，非法值回落到 `build`。`silent=true` 时只同步不回聊天提示（如打开聊天框时的自动重置）。 |
+| `{"type": "set_mode", "mode": "build", "silent": false}` | 切换运行模式，`mode` 取 `build` 或 `plan`，无法识别的值一律回落到 `plan`（只读）。`silent=true` 时只同步不回聊天提示（如打开聊天框时的自动重置）。 |
 | `{"type": "clear_context", "silent": false}` | 清空闲聊上下文（手动按钮 / 闲置自动触发）。 |
 | `{"type": "reload_config"}` | 重载 `config.yaml`（清掉配置缓存），用于设置窗改完 key 后热更新。 |
 | `{"type": "confirm_result", "id": "...", "ok": true}` | 风险任务确认结果，`id` 要与后端发来的 `confirm` 对上。（协议保留，当前不会被触发，见 `permission.py`） |
@@ -101,7 +101,7 @@ copy config.example.yaml config.yaml
 curl http://127.0.0.1:8765/health
 ```
 
-应返回 `{"status":"ok","service":"maomao-backend","time":"..."}`。浏览器直接打开这个地址也行。
+应返回 `{"status":"ok","service":"dandan-backend","time":"..."}`。浏览器直接打开这个地址也行。
 
 **方法二：自测脚本**（另开一个 PowerShell 窗口）
 

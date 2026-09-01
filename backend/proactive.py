@@ -1,5 +1,5 @@
 """
-主动触发引擎（阶段 3 ②）：让毛毛主动开口。
+主动触发引擎：让蛋蛋在久坐、沙箱出现新文件等时机主动开口。
 
   · C 监测类：久坐/很久没理它 → 主动打招呼
   · A 时间类：整点报时（可选，默认关）
@@ -80,7 +80,7 @@ class Proactive:
     # ---- 定时任务 ----
 
     async def _idle_check(self):
-        thr = self.cfg.get("idle_reminder_seconds", 90)
+        thr = self.cfg.get("idle_reminder_seconds", 900)  # 与 config.example.yaml 保持一致
         now = time.time()
         # 久坐：超过阈值没动静，且自上次活动以来还没主动打过招呼
         if now - self.last_activity >= thr and self.last_idle_push < self.last_activity:

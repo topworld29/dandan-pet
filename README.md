@@ -4,7 +4,7 @@
 
 **dandan-pet** is a Windows desktop AI pet: a transparent always-on-top Electron overlay backed by a local Python (FastAPI) service and an `opencode` agent core — it chats, translates selected text, reads text from screenshots, and does real file/command work inside a directory you choose.
 
-版本 **v0.2.1** · 平台 **Windows 10/11 x64** · 许可 **MIT**
+版本 **v0.2.2** · 平台 **Windows 10/11 x64** · 许可 **MIT**
 
 ---
 
@@ -209,7 +209,7 @@ MIT License，见 `LICENSE`。作者：topworld29。
 
 ## English Summary
 
-**dandan-pet (蛋蛋桌宠) v0.2.1** is a Windows desktop AI pet — a small egg-shaped character that lives on your desktop and doubles as an AI assistant.
+**dandan-pet (蛋蛋桌宠) v0.2.2** is a Windows desktop AI pet — a small egg-shaped character that lives on your desktop and doubles as an AI assistant.
 
 **What it does.** A frameless, transparent, always-on-top overlay that stays click-through unless the cursor is actually on the character, never gets dragged off-screen, and hides itself automatically when a fullscreen app takes over. The character is drawn entirely in CSS and animates: breathing, random blinking, walking, talking, plus seven randomly-cycling moods. Beyond looks, it offers: a chat window with frosted-glass bubbles, a thinking placeholder and an interrupt button; agentic work through `opencode` in either `build` (read/write, fully automatic) or `plan` (read-only) mode, with streamed per-step progress and interruption; proactive nudges (idle reminders, new-file detection in the work directory); region-screenshot OCR; and hotkey translation of the current text selection with streaming output. Chat history is summarized when it grows past ~100k tokens, and durable facts about you are stored in a local SQLite file.
 

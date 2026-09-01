@@ -1,6 +1,6 @@
 # 蛋蛋桌宠 · 技术架构文档
 
-> 对应版本：v0.2.1 ｜ 文档最后校对：2026-09-01（已逐节对照当前源码核实）
+> 对应版本：v0.2.2 ｜ 文档最后校对：2026-09-02（已逐节对照当前源码核实）
 
 这份文档写给想**理解**或**改造**本项目的开发者：它说明蛋蛋桌宠由哪几层构成、各层怎么通信、
 关键子系统如何工作、配置从哪来到哪去、以及怎么重新构建发布。
@@ -591,9 +591,10 @@ grep -rn -iE "tts|stt_|micBtn|muteBtn|chat__mic|tools__mute|get_voice|recorder|w
 | **key 明文存储** | `config.yaml` 里的 key 是明文。若该目录处于云盘同步范围内，风险会被放大。可考虑改用系统凭据库，或至少做加密存储 |
 | **OpenAI 大陆不通** | `api.openai.com` 在中国大陆直连不通，需要代理。项目当初选 DeepSeek 就是因为「大陆可直接用」。切到 openai 后拉不到模型列表，基本就说明网络到不了 |
 | **确认弹窗粒度** | 目前 build 模式不逐步确认、直接执行，plan 模式只读。若想恢复「每步确认」逻辑，需要改 `permission.py` 的 `needs_confirm()` |
-| **requirements.txt 不完整** | `proactive.py` 顶层 import 了 `apscheduler` 和 `watchdog`，而 `server.py` 又 import 了 `proactive`；但 `backend/requirements.txt` 里只有 `fastapi` / `uvicorn[standard]` / `openai` / `pyyaml`。在干净环境里照该清单装依赖，后端会起不来 |
 | **后端目录兜底路径过时** | `resolveBackendDir()` 的第 4 条候选指向一个项目外的历史布局目录，现已无用，可以删掉以减少困惑 |
 
 已完成、不再是待办的历史项：打包成应用（v0.2.1 NSIS 单文件安装包）、
 `lru_cache` 配置热更新（`reload_config` 消息链路）、
-硬编码路径清理（配置路径已由 `BASE_DIR` 推导，工作目录改为设置窗指定）。
+硬编码路径清理（配置路径已由 `BASE_DIR` 推导，工作目录改为设置窗指定）、
+`requirements.txt` 不完整（v0.2.2 已补齐 `APScheduler` / `watchdog` / `websockets` 并锁定版本，
+照清单装完即可启动）。

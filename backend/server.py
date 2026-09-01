@@ -1,5 +1,5 @@
 """
-毛毛桌宠 —— Python 后端服务（阶段 2c：流式执行 + 可中断）
+蛋蛋桌宠 —— Python 后端服务（FastAPI + WebSocket，流式执行、可中断）
 
 WebSocket /ws 消息协议：
   前端→后端：
@@ -42,7 +42,8 @@ for _stream in (sys.stdout, sys.stderr):
     except Exception:
         pass
 
-app = FastAPI(title="毛毛桌宠后端", version="0.3.0")
+# version 跟随 package.json，发版时一并更新
+app = FastAPI(title="蛋蛋桌宠后端", version="0.2.2")
 
 # 运行时权限模式覆盖（None 表示用 config.yaml 里的默认）
 _runtime = {"mode": None}
@@ -59,11 +60,14 @@ _VALID_MODES = {"build", "plan"}
 
 
 def current_mode() -> str:
-    m = _runtime["mode"] or get_agent().get("mode", "build")
-    # 兼容旧值
-    if m in ("strict", "default", "auto", "acceptEdits", "bc"):
+    # 兜底一律取 plan（只读）：配置缺失或被写坏时，应落在权限更小的一侧
+    m = _runtime["mode"] or get_agent().get("mode", "plan")
+    # 兼容旧模式名：只有明确表示「放手去改」的旧值才映射到 build。
+    # strict / bc / default 的原意都是「动手前先问我」，而确认机制现已不触发
+    #（permission.needs_confirm 恒为 False），因此按只读处理才符合原意。
+    if m in ("auto", "acceptEdits"):
         return "build"
-    return m if m in _VALID_MODES else "build"
+    return m if m in _VALID_MODES else "plan"
 
 
 async def _broadcast(obj: dict) -> None:
@@ -118,7 +122,7 @@ def _kill_tree(proc) -> None:
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "maomao-backend", "time": datetime.now().isoformat()}
+    return {"status": "ok", "service": "dandan-backend", "time": datetime.now().isoformat()}
 
 
 # ---------- 发送辅助 ----------
@@ -307,7 +311,7 @@ async def websocket_endpoint(ws: WebSocket):
 
             if mtype == "set_mode":
                 m = data.get("mode")
-                new_mode = m if m in _VALID_MODES else "build"
+                new_mode = m if m in _VALID_MODES else "plan"
                 silent = bool(data.get("silent"))  # 静默切换（如打开聊天框时的自动重置）
                 _runtime["mode"] = new_mode
                 print(f"[{_now()}] 切换模式 → {new_mode}{'（静默）' if silent else ''}", flush=True)
