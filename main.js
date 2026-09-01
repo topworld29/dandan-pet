@@ -426,7 +426,11 @@ function connectWS() {
       let obj; try { obj = JSON.parse(data.toString()); } catch (e) { return; }
       broadcast({ kind: "ai", msg: obj });
       // 聊天窗关着时，回复/主动提醒 在蛋蛋头顶冒气泡，避免错过
-      if (obj.type === "reply" && win && (!chatWin || !chatWin.isVisible())) {
+      // 退出时窗口先销毁、ws 才在 will-quit 里关，这中间到达的主动提醒会踩到
+      // 已销毁的窗口对象（它仍是 truthy），故必须连 isDestroyed 一起判
+      const petAlive = win && !win.isDestroyed();
+      const chatShowing = chatWin && !chatWin.isDestroyed() && chatWin.isVisible();
+      if (obj.type === "reply" && petAlive && !chatShowing) {
         win.webContents.send("pet-bubble", obj.text);
         console.log("[bubble] " + String(obj.text).slice(0, 40));
       }

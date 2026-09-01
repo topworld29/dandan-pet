@@ -4,6 +4,12 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。日期为该版本实际完成的日期。
 
+## [未发布]
+
+### 修复
+
+- **退出时可能因操作已销毁的窗口而抛异常。** 主进程收到后端消息后，会在聊天窗关着时于蛋蛋头顶冒气泡；此前的判断只检查窗口变量非空，但 Electron 的窗口对象被销毁后依然是 truthy，再访问 `webContents` / `isVisible()` 就会抛「Object has been destroyed」。退出流程是「窗口先销毁 → `will-quit` 里才关 WebSocket」，这中间到达的主动提醒（久坐、整点、沙箱新文件都是定时推送）正好会踩中。现已按仓库既有写法一并检查 `isDestroyed()`。
+
 ## [0.2.2] - 2026-09-02
 
 ### 新增
