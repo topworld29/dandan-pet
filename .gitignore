@@ -23,3 +23,10 @@ dist-opencode/
 # ============ 杂项 ============
 .DS_Store
 Thumbs.db
+
+# ============ PyInstaller 中间产物（重打后端时生成）============
+backend/dist/
+backend/build_pyi/
+
+# ============ 日志 ============
+*.log

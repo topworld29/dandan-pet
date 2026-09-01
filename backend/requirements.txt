@@ -1,4 +1,24 @@
-fastapi
-uvicorn[standard]
-openai
-pyyaml
+# 后端依赖 —— 版本为当前开发环境（Python 3.14）实测跑通的组合，用 == 精确锁定。
+# 原则：凡是后端源码里【直接 import】的包都列在这里，不依赖传递依赖来兜底。
+#
+# 升级注意：
+#   · fastapi   —— server.py 用的是 @app.on_event("startup"/"shutdown")，该写法官方已标记弃用，
+#                  升大版本前先确认它还在，或改写成 lifespan 上下文管理器。
+#   · uvicorn   —— 必须保留 [standard] extras（httptools / watchfiles 等由它带入），去掉会缺功能。
+#   · openai    —— 只用到 chat.completions.create；各家服务的参数方言差异由 config.py 的
+#                  provider_kwargs() 抹平，换大版本时重点回归这个调用。
+#   · 升级后请重新跑一遍 test_echo.py，并确认 dandan-backend.spec 仍能打包成功。
+
+# ---- 服务与模型 ----
+fastapi==0.137.2
+uvicorn[standard]==0.49.0
+openai==2.43.0
+PyYAML==6.0.3
+
+# ---- 主动触发（proactive.py 直接 import，缺了 server.py 起不来）----
+APScheduler==3.11.2
+watchdog==6.0.0
+
+# ---- 自测脚本 test_echo.py 直接 import ----
+# 注：uvicorn[standard] 也会带入 websockets，但这里是直接 import，故显式登记
+websockets==16.0
