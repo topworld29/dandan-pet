@@ -77,6 +77,25 @@
 
 ---
 
+## 安装（推荐）
+
+到 [Releases](../../releases) 下载最新的 `dandan-pet_<版本>_Windows_x64.exe`，双击安装即可。
+NSIS 一键安装，装在当前用户目录下，不需要管理员权限；**后端与干活内核都已打包在内，使用者无需安装 Python 或 Node.js**。
+
+安装前建议核对文件完整性，与 Release 页面公布的 SHA-256 比对：
+
+```powershell
+Get-FileHash '.\dandan-pet_0.2.2_Windows_x64.exe' -Algorithm SHA256
+```
+
+> 安装包**未做代码签名**，首次运行可能触发 Windows SmartScreen「未知发布者」提示。这是未签名的正常现象，不代表文件损坏——核对过 SHA-256 后选「更多信息」→「仍要运行」即可。请只从本仓库的 Release 页面下载。
+
+装完后右键蛋蛋 →「设置」，选服务商、填入**你自己的 API Key**、选一个工作目录即可开始用。安装包内的配置文件不含任何密钥。
+
+想改代码或自己构建，见下一节。
+
+---
+
 ## 从源码运行
 
 ### 1. 前置
@@ -217,6 +236,8 @@ MIT License，见 `LICENSE`。作者：topworld29。
 
 **Platform limits.** Windows 10/11 x64 only (fullscreen detection and the selection-copy trick are Windows-specific). `api.openai.com` is not directly reachable from mainland China, so OpenAI needs a proxy there.
 
-**Running from source.** Install Node.js 18+ and Python 3.10+, then `npm install`; create a venv under `backend/` and `pip install -r requirements.txt`; copy `backend/config.example.yaml` to `backend/config.yaml` and fill in your `api_key`; download the Windows x64 `opencode.exe` from <https://github.com/sst/opencode> releases into `dist-opencode/` (it is ~158 MB, over GitHub's 100 MB per-file limit, so it cannot be committed — without it only the agent feature is unavailable); then `npm start`.
+**Installing.** Grab `dandan-pet_<version>_Windows_x64.exe` from the [Releases](../../releases) page and run it — the Python backend and the agent core are bundled, so no Python or Node.js install is needed. The installer is unsigned, so Windows SmartScreen may warn on first run; verify the published SHA-256 first. The bundled config ships with empty API keys — you add your own in the settings window.
+
+**Building from source.** Install Node.js 18+ and Python 3.10+, then `npm install`; create a venv under `backend/` and `pip install -r requirements.txt`; copy `backend/config.example.yaml` to `backend/config.yaml` and fill in your `api_key`; download the Windows x64 `opencode.exe` from <https://github.com/sst/opencode> releases into `dist-opencode/` (it is ~158 MB, over GitHub's 100 MB per-file limit, so it cannot be committed — without it only the agent feature is unavailable); then `npm start`.
 
 **License.** MIT — see `LICENSE`.
