@@ -109,8 +109,20 @@ def chat(user_text: str, session_id: str = "default") -> str:
         if _compact_history(history, provider, system_content):
             _last_compacted["flag"] = True
 
+    # 只带最近 max_turns 轮（一轮 = 一问一答 = 2 条消息）。
+    # 注意：压缩产生的摘要固定在 history[0]（唯一的 system 角色，见 _compact_history），
+    # 裁窗口时必须把它带上，否则刚压缩出来的摘要立刻被裁掉，压缩就白做了。
+    hist = list(history)
+    n = max_turns * 2
+    if n > 0 and len(hist) > n:
+        window = hist[-n:]
+        if hist[0].get("role") == "system":
+            window = [hist[0]] + window
+    else:
+        window = hist
+
     messages = [{"role": "system", "content": system_content}]
-    messages.extend(history)
+    messages.extend(window)
     messages.append({"role": "user", "content": user_text})
 
     client = _client(provider)
@@ -127,8 +139,8 @@ def chat(user_text: str, session_id: str = "default") -> str:
 
     reply = resp.choices[0].message.content.strip()
 
-    # 更新历史。上下文长度主要靠 100k token 压缩来控制（见开头 _compact_history），
-    # 这里只留一个很宽松的硬上限（防止极端情况无限增长）。
+    # 更新历史。发给模型的长度由上面的 max_turns 窗口控制；
+    # 存下来的这份 deque 则靠 100k token 压缩（见开头 _compact_history）+ 下面的硬上限兜底。
     history.append({"role": "user", "content": user_text})
     history.append({"role": "assistant", "content": reply})
     _HARD_CAP = 400  # 最多 400 条消息的安全上限
