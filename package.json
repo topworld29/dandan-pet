@@ -1,6 +1,6 @@
 {
   "name": "dandan-pet",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "轻量像素桌宠 蛋蛋 —— Electron 透明浮窗外壳",
   "main": "main.js",
   "scripts": {

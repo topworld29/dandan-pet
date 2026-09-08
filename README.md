@@ -4,7 +4,7 @@
 
 **dandan-pet** is a Windows desktop AI pet: a transparent always-on-top Electron overlay backed by a local Python (FastAPI) service and an `opencode` agent core — it chats, translates selected text, reads text from screenshots, and does real file/command work inside a directory you choose.
 
-版本 **v0.2.2** · 平台 **Windows 10/11 x64** · 许可 **MIT**
+版本 **v0.2.3** · 平台 **Windows 10/11 x64** · 许可 **MIT**
 
 ---
 
@@ -85,7 +85,7 @@ NSIS 一键安装，装在当前用户目录下，不需要管理员权限；**�
 安装前建议核对文件完整性，与 Release 页面公布的 SHA-256 比对：
 
 ```powershell
-Get-FileHash '.\dandan-pet_0.2.2_Windows_x64.exe' -Algorithm SHA256
+Get-FileHash '.\dandan-pet_0.2.3_Windows_x64.exe' -Algorithm SHA256
 ```
 
 > 安装包**未做代码签名**，首次运行可能触发 Windows SmartScreen「未知发布者」提示。这是未签名的正常现象，不代表文件损坏——核对过 SHA-256 后选「更多信息」→「仍要运行」即可。请只从本仓库的 Release 页面下载。
@@ -228,7 +228,7 @@ MIT License，见 `LICENSE`。作者：topworld29。
 
 ## English Summary
 
-**dandan-pet (蛋蛋桌宠) v0.2.2** is a Windows desktop AI pet — a small egg-shaped character that lives on your desktop and doubles as an AI assistant.
+**dandan-pet (蛋蛋桌宠) v0.2.3** is a Windows desktop AI pet — a small egg-shaped character that lives on your desktop and doubles as an AI assistant.
 
 **What it does.** A frameless, transparent, always-on-top overlay that stays click-through unless the cursor is actually on the character, never gets dragged off-screen, and hides itself automatically when a fullscreen app takes over. The character is drawn entirely in CSS and animates: breathing, random blinking, walking, talking, plus seven randomly-cycling moods. Beyond looks, it offers: a chat window with frosted-glass bubbles, a thinking placeholder and an interrupt button; agentic work through `opencode` in either `build` (read/write, fully automatic) or `plan` (read-only) mode, with streamed per-step progress and interruption; proactive nudges (idle reminders, new-file detection in the work directory); region-screenshot OCR; and hotkey translation of the current text selection with streaming output. Chat history is summarized when it grows past ~100k tokens, and durable facts about you are stored in a local SQLite file.
 
