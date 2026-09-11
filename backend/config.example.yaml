@@ -12,7 +12,7 @@ chat:
   providers:
     deepseek:            # DeepSeek 官方
       base_url: https://api.deepseek.com
-      model: "deepseek-v4-flash-vision-exp"
+      model: "deepseek-chat"
       api_key: ""
       # 参数方言：不同厂商对这两个参数的要求不一样，加新服务时按需改
       max_tokens_param: max_tokens      # 长度上限用哪个参数名

@@ -321,7 +321,7 @@ const WS_URL = "ws://127.0.0.1:8765/ws";
 /* ---- 内置 opencode（干活内核）----
    打包时把官方独立版 opencode.exe 放进 resources/opencode（无需 Node.js），
    拉起后端时把该目录插到 PATH 最前——后端 shutil.which("opencode") 就会先找到它，
-   朋友装完蛋蛋即可让它干活，不用再装任何东西。开发目录的 dist-opencode 同样生效。 */
+   装完即可直接干活，无需再装任何东西。开发目录的 dist-opencode 同样生效。 */
 function bundledOpencodeDir() {
   const candidates = [];
   if (app.isPackaged) candidates.push(path.join(process.resourcesPath, "opencode"));

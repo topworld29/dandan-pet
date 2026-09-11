@@ -16,7 +16,7 @@ import subprocess
 from config import get_agent, get_chat_provider
 
 # 干活用哪个 provider/model：跟着设置窗里选的那家服务和那个模型走。
-_FALLBACK_MODEL = "deepseek/deepseek-v4-flash-vision-exp"
+_FALLBACK_MODEL = "deepseek/deepseek-chat"
 
 
 def opencode_model() -> str:

@@ -6,6 +6,10 @@
 
 ## [未发布]
 
+### 变更
+
+- 配置模板与代码回退值里的 DeepSeek 模型名由实验别名 `deepseek-v4-flash-vision-exp` 改为通用名 `deepseek-chat`，`docs/ARCHITECTURE.md` 示例同步。实际使用仍以设置窗所选为准。
+
 ## [0.2.3] - 2026-09-08
 
 ### 修复

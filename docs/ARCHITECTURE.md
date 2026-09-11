@@ -228,7 +228,7 @@ chat:
   providers:
     deepseek:
       base_url: https://api.deepseek.com
-      model: "deepseek-v4-flash-vision-exp"
+      model: "deepseek-chat"
       api_key: ""
       max_tokens_param: max_tokens      # 参数方言，见坑 11
       supports_temperature: true

@@ -35,3 +35,4 @@ backend/build_pyi/
 .claude/
 .remember/
 .video_agent/
+.mimosa/
