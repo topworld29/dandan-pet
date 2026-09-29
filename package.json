@@ -10,7 +10,7 @@
   "author": "topworld29",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^43.0.0",
+    "electron": "^43.5.0",
     "electron-builder": "^26.15.3"
   },
   "dependencies": {
